@@ -12,7 +12,8 @@ app = func.Blueprint()
 def extract_chamado(myTimer: func.TimerRequest) -> None:
 
     logging.info("Iniciando leitura da tabela itsm.chamado")
- 
+    
+    # Lê as variáveis de ambiente para a conexão com o banco de dados
     server = os.getenv("SQL_SERVER")
     database = os.getenv("SQL_DATABASE")
     username = os.getenv("SQL_USER")
@@ -21,7 +22,7 @@ def extract_chamado(myTimer: func.TimerRequest) -> None:
 
     logging.info(f"Server: {server}, Database: {database}, User: {username}, Password: {password}")
 
-
+    # Configura a string de conexão para o banco de dados SQL Server
     conn_str = (
         "DRIVER={ODBC Driver 18 for SQL Server};"
         f"SERVER={server};"
@@ -39,24 +40,27 @@ def extract_chamado(myTimer: func.TimerRequest) -> None:
     """
 
     try:
+        # Estabelece a conexão com o banco de dados usando pyodbc
         with pyodbc.connect(conn_str) as conn:
+            # Cria um cursor para executar a consulta   
             cursor = conn.cursor()
+            
+            # Executa a consulta SQL
             cursor.execute(query)
 
+            # Obtém os nomes das colunas a partir do cursor
             columns = [column[0] for column in cursor.description]
+            # Busca todos os resultados da consulta
             rows = cursor.fetchall()
 
+            # Converte os resultados para uma lista de dicionários
             data = [
                 dict(zip(columns, row))
                 for row in rows
             ]
 
-            # logging.info(
-            #     json.dumps(data, default=str, ensure_ascii=False)
-            # )
-
             logging.info(f"rows: {data[:5]}")  # Loga apenas os primeiros 5 registros para evitar excesso de log
-            #logging.info(f"Total de registros lidos: {len(data)}")
+            logging.info(f"Total de registros lidos: {len(data)}")
 
     except Exception as e:
         logging.error(f"Erro ao ler itsm.chamado: {str(e)}")
