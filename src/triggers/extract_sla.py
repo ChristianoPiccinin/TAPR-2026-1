@@ -1,5 +1,6 @@
 import logging
 import azure.functions as func
+import os
 
 app = func.Blueprint()
 
@@ -8,3 +9,5 @@ app = func.Blueprint()
               use_monitor=False) 
 def extract_sla(myTimer: func.TimerRequest) -> None:
     logging.info('tabela sla')
+    logging.info(f'{os.getenv("SQL_SERVER_SOURCE")}')
+    
